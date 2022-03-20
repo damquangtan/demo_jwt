@@ -1,0 +1,174 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CustomAuthorizationFilter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+    @import "../../.css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../.js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.example.demo_jwt.filter</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomAuthorizationFilter (com.example.demo_jwt.filter)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomAuthorizationFilter</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/27)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;package com.example.demo_jwt.filter;
+<i class="no-highlight">2</i>&nbsp;
+<i class="no-highlight">3</i>&nbsp;import com.auth0.jwt.JWT;
+<i class="no-highlight">4</i>&nbsp;import com.auth0.jwt.JWTVerifier;
+<i class="no-highlight">5</i>&nbsp;import com.auth0.jwt.algorithms.Algorithm;
+<i class="no-highlight">6</i>&nbsp;import com.auth0.jwt.interfaces.DecodedJWT;
+<i class="no-highlight">7</i>&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+<i class="no-highlight">8</i>&nbsp;import lombok.extern.slf4j.Slf4j;
+<i class="no-highlight">9</i>&nbsp;import org.springframework.http.HttpHeaders;
+<i class="no-highlight">10</i>&nbsp;import org.springframework.http.HttpStatus;
+<i class="no-highlight">11</i>&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+<i class="no-highlight">12</i>&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+<i class="no-highlight">13</i>&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+<i class="no-highlight">14</i>&nbsp;import org.springframework.web.filter.OncePerRequestFilter;
+<i class="no-highlight">15</i>&nbsp;
+<i class="no-highlight">16</i>&nbsp;import javax.servlet.FilterChain;
+<i class="no-highlight">17</i>&nbsp;import javax.servlet.ServletException;
+<i class="no-highlight">18</i>&nbsp;import javax.servlet.http.HttpServletRequest;
+<i class="no-highlight">19</i>&nbsp;import javax.servlet.http.HttpServletResponse;
+<i class="no-highlight">20</i>&nbsp;import java.io.IOException;
+<i class="no-highlight">21</i>&nbsp;import java.util.ArrayList;
+<i class="no-highlight">22</i>&nbsp;import java.util.Collection;
+<i class="no-highlight">23</i>&nbsp;import java.util.HashMap;
+<i class="no-highlight">24</i>&nbsp;import java.util.Map;
+<i class="no-highlight">25</i>&nbsp;
+<i class="no-highlight">26</i>&nbsp;import static java.util.Arrays.stream;
+<i class="no-highlight">27</i>&nbsp;
+<b class="nc"><i class="no-highlight">28</i>&nbsp;@Slf4j</b>
+<b class="nc"><i class="no-highlight">29</i>&nbsp;public class CustomAuthorizationFilter extends OncePerRequestFilter {</b>
+<i class="no-highlight">30</i>&nbsp;    @Override
+<i class="no-highlight">31</i>&nbsp;    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+<i class="no-highlight">32</i>&nbsp;            throws ServletException, IOException {
+<b class="nc"><i class="no-highlight">33</i>&nbsp;        if (request.getServletPath().equals(&quot;/api/login&quot;) || request.getServletPath().equals(&quot;/api/token/refresh&quot;)) {</b>
+<b class="nc"><i class="no-highlight">34</i>&nbsp;            filterChain.doFilter(request, response);</b>
+<i class="no-highlight">35</i>&nbsp;        } else {
+<b class="nc"><i class="no-highlight">36</i>&nbsp;            String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);</b>
+<b class="nc"><i class="no-highlight">37</i>&nbsp;            if (authorizationHeader != null &amp;&amp; authorizationHeader.startsWith(&quot;Bearer &quot;)) {</b>
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;                try {
+<b class="nc"><i class="no-highlight">40</i>&nbsp;                    String token = authorizationHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</b>
+<b class="nc"><i class="no-highlight">41</i>&nbsp;                    Algorithm algorithm = Algorithm.HMAC256(&quot;secret&quot;.getBytes());</b>
+<b class="nc"><i class="no-highlight">42</i>&nbsp;                    JWTVerifier verifier = JWT.require(algorithm).build();</b>
+<b class="nc"><i class="no-highlight">43</i>&nbsp;                    DecodedJWT decodedJWT = verifier.verify(token);</b>
+<i class="no-highlight">44</i>&nbsp;
+<b class="nc"><i class="no-highlight">45</i>&nbsp;                    String username = decodedJWT.getSubject();</b>
+<b class="nc"><i class="no-highlight">46</i>&nbsp;                    String[] roles = decodedJWT.getClaim(&quot;roles&quot;).asArray(String.class);</b>
+<b class="nc"><i class="no-highlight">47</i>&nbsp;                    Collection&lt;SimpleGrantedAuthority&gt; authorities = new ArrayList&lt;&gt;();</b>
+<i class="no-highlight">48</i>&nbsp;
+<b class="nc"><i class="no-highlight">49</i>&nbsp;                    stream(roles).forEach(role -&gt; authorities.add(new SimpleGrantedAuthority(role)));</b>
+<i class="no-highlight">50</i>&nbsp;
+<b class="nc"><i class="no-highlight">51</i>&nbsp;                    UsernamePasswordAuthenticationToken authenticationToken =</b>
+<i class="no-highlight">52</i>&nbsp;                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+<i class="no-highlight">53</i>&nbsp;
+<b class="nc"><i class="no-highlight">54</i>&nbsp;                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);</b>
+<b class="nc"><i class="no-highlight">55</i>&nbsp;                    filterChain.doFilter(request, response);</b>
+<b class="nc"><i class="no-highlight">56</i>&nbsp;                } catch (Exception exception) {</b>
+<b class="nc"><i class="no-highlight">57</i>&nbsp;                    log.error(&quot;Error logging in: {}&quot;, exception.getMessage());</b>
+<b class="nc"><i class="no-highlight">58</i>&nbsp;                    response.setHeader(&quot;error&quot;, exception.getMessage());</b>
+<b class="nc"><i class="no-highlight">59</i>&nbsp;                    response.setStatus(HttpStatus.FORBIDDEN.value());</b>
+<b class="nc"><i class="no-highlight">60</i>&nbsp;                    Map&lt;String, String&gt; error = new HashMap&lt;&gt;();</b>
+<b class="nc"><i class="no-highlight">61</i>&nbsp;                    error.put(&quot;error_message&quot;, exception.getMessage());</b>
+<b class="nc"><i class="no-highlight">62</i>&nbsp;                    new ObjectMapper().writeValue(response.getOutputStream(), error);</b>
+<b class="nc"><i class="no-highlight">63</i>&nbsp;                }</b>
+<i class="no-highlight">64</i>&nbsp;            } else {
+<b class="nc"><i class="no-highlight">65</i>&nbsp;                filterChain.doFilter(request, response);</b>
+<i class="no-highlight">66</i>&nbsp;            }
+<i class="no-highlight">67</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">68</i>&nbsp;    }</b>
+<i class="no-highlight">69</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-20 08:12</div>
+</div>
+</body>
+</html>
