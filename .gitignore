@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+.css
+.img
+.js
+.mvn
+ns-1
+report_coverage
